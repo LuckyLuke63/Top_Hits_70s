@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>I maggiori successi degli anni '60</title>
+  <style>
+    body { font-family: Arial,sans-serif; background: linear-gradient(135deg,#f2ebe0 0%,#ede0d3 100%); color: #3b2f2f; max-width:800px; margin:2em auto; padding:0 1em;}
+    h1 { text-align:center; font-size:2.2em; margin-bottom:.2em; color:#8b4513;}
+    .subtitle { text-align:center; margin-bottom:1.5em; color:#7d5a50; font-style:italic;}
+    .controls { display:flex; justify-content:center; align-items:center; margin-bottom:1.5em; gap:.5em;}
+    select { padding:8px 12px; border-radius:6px; border:2px solid #a65e2e; background:white; font-size:1em; color:#3b2f2f;}
+    .song { background: #fff; border-radius:12px; padding:16px; margin-bottom:1.2em; display:flex; align-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.15); transition:transform 0.2s;}
+    .song:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.2);}
+    .album-cover { width:64px; height:64px; border-radius:8px; margin-right:16px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:2em; color:#ccc; flex-shrink:0; overflow:hidden;}
+    .album-cover img { width:100%; height:100%; object-fit:cover; border-radius:8px;}
+    .song-info { flex:1; margin-right:12px;}
+    .rank { font-size:1.5em; font-weight:bold; color:#a65e2e; margin-right:8px;}
+    .title { font-weight:bold; font-size:1.1em; color:#2c1810;}
+    .artist { color:#666; font-size:0.95em; margin-top:2px;}
+    button { background: linear-gradient(135deg,#1db954 0%,#1ed760 100%); border:none; color:white; padding:10px 16px; border-radius:25px; cursor:pointer; font-size:0.9em; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(29,185,84,0.3);}
+    button:hover { background: linear-gradient(135deg,#17a44c 0%,#1bcf5a 100%); transform:translateY(-1px);}
+    #overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:1000;}
+    #player { background:#fff; border-radius:16px; padding:24px; max-width:420px; width:90%; text-align:center; box-shadow:0 12px 32px rgba(0,0,0,0.3);}
+    #player h3 { margin:0 0 8px; color:#2c1810; font-size:1.3em;}
+    #player p { margin:0 0 16px; color:#666;}
+    #close { margin-top:16px; background: linear-gradient(135deg,#c0392b 0%,#e74c3c 100%);}
+    #close:hover { background: linear-gradient(135deg,#a93226 0%,#cb4335 100%);}
+    .year-badge { background:#a65e2e; color:white; padding:4px 8px; border-radius:12px; font-size:0.7em; font-weight:bold; margin-left:8px;}
+  </style>
+</head>
+<body>
+  <h1>🎵 I maggiori successi degli anni '60</h1>
+  <div class="subtitle">Anteprime di 30 secondi da Spotify con copertine originali</div>
+  <div class="controls">
+    <label for="yearSel"><strong>Anno:</strong></label>
+    <select id="yearSel" onchange="renderYear(this.value)">
+      <option value="1960">1960</option>
+      <option value="1961">1961</option>
+      <option value="1962">1962</option>
+      <option value="1963">1963</option>
+      <option value="1964">1964</option>
+      <option value="1965">1965</option>
+      <option value="1966">1966</option>
+      <option value="1967">1967</option>
+      <option value="1968">1968</option>
+      <option value="1969">1969</option>
+    </select>
+  </div>
+  <div id="list"></div>
+  <div id="overlay">
+    <div id="player">
+      <h3 id="track-title"></h3>
+      <p id="track-artist"></p>
+      <iframe id="sp-player" width="300" height="80" src="" frameborder="0" allow="autoplay; encrypted-media"></iframe>
+      <br>
+      <button id="close" onclick="closePlayer()">Chiudi</button>
+    </div>
+  </div>
+  <script>
+    const tracksByYear = {
+      "1960": [
+        {rank:1, title:"Il cielo in una stanza", artist:"Mina", spotifyId:"1xpOTLhRnbo5PiP0tp8dlr"},
+        {rank:2, title:"Marina", artist:"Rocco Granata", spotifyId:"3pFT1UfjSdKwjIS0tWg7ka"},
+        {rank:3, title:"Personalità", artist:"Caterina Valente", spotifyId:"30BSx1WksDHuPCoT7howxi"},
+        {rank:4, title:"Il nostro concerto", artist:"Umberto Bindi", spotifyId:"6XWGhwAC0PCzy0kGUC61Sn"},
+        {rank:5, title:"Tintarella di luna", artist:"Mina", spotifyId:"6Eq8JOhT7dvKUK1lWTG6IM"},
+        {rank:6, title:"It's Now or Never", artist:"Elvis Presley", spotifyId:"6VeHNzriWaXTi4lWYeRSS2"},
+        {rank:7, title:"Romantica", artist:"Tony Dallara", spotifyId:"2aurJoltTci6EpjkUzcLbo"},
+        {rank:8, title:"Oh! Carol", artist:"Neil Sedaka", spotifyId:"5Ebra4sGcXTODU0OgjN5aP"},
+        {rank:9, title:"Su nel cielo (What a Sky)", artist:"Nico Fidenco", spotifyId:"1MZZgw4NH1QzRhETewrRHh"},
+        {rank:10, title:"Theme from A Summer Place", artist:"Percy Faith", spotifyId:"6151Dc5o5gDdnM254YLhvL"}
+      ],
+      "1961": [
+        {rank:1, title:"Nata per me", artist:"Adriano Celentano", spotifyId:"0gIkTfFUDDLWarcdWcdox6"},
+        {rank:2, title:"Il mondo di Suzie Wong", artist:"Nico Fidenco", spotifyId:"4IJTEmP56I7BvYh4yT4JxP"},
+        {rank:3, title:"Legata a un granello di sabbia", artist:"Nico Fidenco", spotifyId:"2RzUHt64JOSOmTYbnlqZRj"},
+        {rank:4, title:"Jealous of You (Tango della gelosia)", artist:"Connie Francis", spotifyId:"0smAeYY1wk2rqtiGcHPPcf"},
+        {rank:5, title:"La ballata della tromba", artist:"Nini Rosso", spotifyId:"2jUB7ilv59eyi7YOBLcXhj"},
+        {rank:6, title:"La novia", artist:"Tony Dallara", spotifyId:"24BpZMZl2BN4Q3OjhbjgvD"},
+        {rank:7, title:"Pepito", artist:"Los Machucambos", spotifyId:"0GyFH0ZcaC7mtBNuM8lMpY"},
+        {rank:8, title:"Come sinfonia", artist:"Pino Donaggio", spotifyId:"7y0weeTSPdnWQjbvQQRqvo"},
+        {rank:9, title:"Non esiste l'amor", artist:"Adriano Celentano", spotifyId:"4ZxzT1F4ckg2tSaWUONxtN"},
+        {rank:10, title:"Il pullover", artist:"Gianni Meccia", spotifyId:"6k1vlvRxxXeJt56utkGnUN"}
+      ],
+      "1962": [
+        {rank:1, title:"Pregherò (Stand by me)", artist:"Adriano Celentano", spotifyId:"52RwoFzfa0Qx1UBa21Zn92"},
+        {rank:2, title:"Ogni giorno (Love me warm and tender)", artist:"Paul Anka", spotifyId:"4UFMRcVy53BPzILwpqWK5y"},
+        {rank:3, title:"Stai lontana da me (Tower of strength)", artist:"Adriano Celentano", spotifyId:"1YXxs3HqdatZlap8qD1WCH"},
+        {rank:4, title:"Quando quando quando", artist:"Tony Renis", spotifyId:"4UwQVj2v2gTATYzA3sSQBn"},
+        {rank:5, title:"Speedy Gonzales", artist:"Pat Boone", spotifyId:"52pDZoujP4zlX1th7qmety"},
+        {rank:6, title:"Cuando calienta el sol", artist:"Los Hermanos Rigual", spotifyId:"6hfUS6AYMIK8wVpeCHmUjT"},
+        {rank:7, title:"Si è spento il sole", artist:"Adriano Celentano", spotifyId:"2M7A16RBtZAgRuX2SIwCNv"},
+        {rank:8, title:"Let's twist again", artist:"Peppino Di Capri", spotifyId:"65ULJRsZeqNkFea6SuJbvM"},
+        {rank:9, title:"Abat jour (Salomè)", artist:"Henry Wright", spotifyId:"3MOLLwD9WEA6n5j1ur2jrS"},
+        {rank:10, title:"St. Tropez twist", artist:"Peppino Di Capri", spotifyId:"2x4YxJL14rMyEcctkXdF8Z"}
+      ],
+      "1963": [
+        {rank:1, title:"Cuore", artist:"Rita Pavone", spotifyId:"2z0d8JbMRXvJ7dVlOeTkvv"},
+        {rank:2, title:"Quelli della mia età", artist:"Françoise Hardy", spotifyId:"33HmtDst7MLWdvCgRtlIOP"},
+        {rank:3, title:"Come te non c'è nessuno", artist:"Rita Pavone", spotifyId:"4GBbjibJ1uEZSpj2tABwCN"},
+        {rank:4, title:"Se mi vuoi lasciare", artist:"Michele", spotifyId:"5EOoElhbLrRM4cWMTY8qgD"},
+        {rank:5, title:"La partita di pallone", artist:"Rita Pavone", spotifyId:"2q67dr5VuSz8PRU3Ujcrjc"},
+        {rank:6, title:"Sapore di sale", artist:"Gino Paoli", spotifyId:"6Pk2dZivM7K17zsnU2c5yf"},
+        {rank:7, title:"Non ho l'età (Per amarti)", artist:"Gigliola Cinquetti", spotifyId:"65715T2yQVD0uPDRcrODGk"},
+        {rank:8, title:"Abbracciami forte", artist:"Ornella Vanoni", spotifyId:"1gMxuHsOzfTEG4KTHf2VSO"},
+        {rank:9, title:"Quando vedrai la mia ragazza", artist:"Little Tony", spotifyId:"3haDVYwzj22yjaOSDOoiEW"},
+        {rank:10, title:"I tuoi capricci", artist:"Neil Sedaka", spotifyId:"54wB8S88IjqTRBnifUsnFl"}
+      ],
+      "1964": [
+        {rank:1, title:"In ginocchio da te", artist:"Gianni Morandi", spotifyId:"09jv6S4KKCafPzreGpWcfp"},
+        {rank:2, title:"Cin cin", artist:"Richard Anthony", spotifyId:"3eRuGlkHK8PZgLjAe34jzs"},
+        {rank:3, title:"Il problema più importante", artist:"Adriano Celentano", spotifyId:"6YZpua2zT1YSN7KJplDpSI"},
+      ],
+      "1965": [
+        {rank:1, title:"Il mondo", artist:"Jimmy Fontana", spotifyId:"2wiHLZekZ64shG0S1Zz9oy"},
+        {rank:2, title:"Il silenzio", artist:"Nini Rosso", spotifyId:"3IaXbJBLu2MgwJMu1KvUvQ"},
+        {rank:3, title:"Un Anno d'amore", artist:"Mina", spotifyId:"2rn48d6ACa5rpLLnnowNQ0"},
+      ],
+      "1966": [
+        {rank:1, title:"Strangers in the night", artist:"Frank Sinatra", spotifyId:"74VR3AkGPhbYXnxcOYa16x"},
+        {rank:2, title:"Bang Bang", artist:"Equipe 84", spotifyId:"4BYi4l9ne8ieIYLis4kBOP"},
+        {rank:3, title:"La fisarmonica", artist:"Gianni Morandi", spotifyId:"5D5SrXUqP8b2h74CRDBneF"},
+      ],
+      "1967": [
+        {rank:1, title:"A chi (Hurt)", artist:"Fausto Leali", spotifyId:"40WnwseuE8YPiMdJIs08UQ"},
+      ],
+      "1968": [
+        {rank:1, title:"Azzurro", artist:"Adriano Celentano", spotifyId:"18IHat7huwIdEQ9hhaKfDr"},
+      ],
+      "1969": [
+        {rank:1, title:"Lo straniero", artist:"Georges Moustaki", spotifyId:"2s87dcsw2KjuhDnVqJ98Cu"},
+      ]
+    };
+
+    async function getCoverArt(spotifyId) {
+      try {
+        const response = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${spotifyId}`);
+        const data = await response.json();
+        return data.thumbnail_url || null;
+      } catch (error) { return null; }
+    }
+
+    async function renderYear(year) {
+      const list = document.getElementById('list');
+      list.innerHTML = '<div style="text-align:center;padding:20px;">Caricamento copertine...</div>';
+      const tracks = tracksByYear[year];
+      list.innerHTML = '';
+      for (const track of tracks) {
+        const div = document.createElement('div');
+        div.className = 'song';
+        const coverDiv = document.createElement('div');
+        coverDiv.className = 'album-cover';
+        coverDiv.innerHTML = '🎵';
+        const info = document.createElement('div');
+        info.className = 'song-info';
+        info.innerHTML = `
+          <div>
+            <span class='rank'>${track.rank}.</span>
+            <span class='title'>${track.title}</span>
+            <span class='year-badge'>${year}</span>
+          </div>
+          <div class='artist'>${track.artist}</div>
+        `;
+        const btn = document.createElement('button');
+        btn.textContent = 'Ascolta 30s';
+        btn.onclick = () => openPlayer(track.spotifyId,track.title,track.artist);
+        div.appendChild(coverDiv);
+        div.appendChild(info);
+        div.appendChild(btn);
+        list.appendChild(div);
+        getCoverArt(track.spotifyId).then(coverUrl => {
+          if (coverUrl) {
+            const img = document.createElement('img');
+            img.src = coverUrl; img.alt=track.title+' - '+track.artist;
+            img.onload = () => { coverDiv.innerHTML = ''; coverDiv.appendChild(img); };
+            img.onerror = () => coverDiv.innerHTML = '💿';
+          } else {
+            coverDiv.innerHTML = '💿';
+          }
+        });
+      }
+    }
+
+    function openPlayer(id, title, artist) {
+      document.getElementById('track-title').textContent = title;
+      document.getElementById('track-artist').textContent = artist;
+      document.getElementById('sp-player').src = `https://open.spotify.com/embed/track/${id}?theme=0`;
+      document.getElementById('overlay').style.display = 'flex';
+    }
+    function closePlayer() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('sp-player').src = '';
+    }
+    document.getElementById('overlay').addEventListener('click', e => {
+      if (e.target.id === 'overlay') closePlayer();
+    });
+    document.addEventListener('keydown', e => { if (e.key==="Escape") closePlayer(); });
+    document.addEventListener('DOMContentLoaded', () => renderYear('1960'));
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
