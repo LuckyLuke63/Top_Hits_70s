@@ -1,1 +1,1 @@
-I grandi successi degli anni '60
+I grandi successi degli anni '70
